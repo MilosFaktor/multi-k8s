@@ -1,0 +1,32 @@
+name: Deploy complex multi step
+on:
+    workflow_dispatch:
+    # push:
+    #     branches: [main]
+    #     paths-ignore:
+    #         - "README.md"
+    #         - "screenshots/**"
+
+jobs:
+    test:
+        uses: ./.github/workflows/_test.yml
+
+    build_and_push:
+        needs: test
+        permissions:
+            contents: read
+            id-token: write
+        uses: ./.github/workflows/_build-push.yml
+        with:
+            sha: ${{ github.sha }}
+        secrets: inherit
+
+    deploy:
+        needs: build_and_push
+        permissions:
+            contents: read
+            id-token: write
+        uses: ./.github/workflows/_deploy.yml
+        with:
+            sha: ${{ github.sha }}
+        secrets: inherit
