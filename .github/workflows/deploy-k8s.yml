@@ -1,0 +1,73 @@
+name: Deploy k8s
+on:
+    workflow_dispatch:
+    push:
+        branches: [main]
+        paths-ignore:
+            - "**.md"
+            - "screenshots/**"
+            - "commands.sh"
+            - ".gitignore"
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: k8s
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      # - name: Get GKE credentials
+      #   uses: google-github-actions/get-gke-credentials@v3
+      #   with:
+      #     cluster_name: ${{ secrets.GKE_CLUSTER }}
+      #     location: ${{ secrets.GKE_LOCATION }}
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build test image
+        run: docker build -t milosfaktor/react-test -f ./client/Dockerfile.dev ./client
+
+      - name: Run tests
+        run: docker run -e CI=true milosfaktor/react-test npm test
+
+      # - name: Build production images
+      #   run: |
+      #     docker build -t milosfaktor/multi-client:${{ github.sha }} ./client
+      #     docker build -t milosfaktor/multi-server:${{ github.sha }} ./server
+      #     docker build -t milosfaktor/multi-worker:${{ github.sha }} ./worker
+
+      # - name: Push images
+      #   run: |
+      #     docker push milosfaktor/multi-client:${{ github.sha }}
+      #     docker push milosfaktor/multi-server:${{ github.sha }}
+      #     docker push milosfaktor/multi-worker:${{ github.sha }}
+
+      # - name: Apply Kubernetes configs
+      #   run: kubectl apply -f k8s
+
+      # - name: Update deployment images
+      #   run: |
+      #     kubectl set image deployments/server-deployment server=milosfaktor/multi-server:${{ github.sha }}
+      #     kubectl set image deployments/client-deployment client=milosfaktor/multi-client:${{ github.sha }}
+      #     kubectl set image deployments/worker-deployment worker=milosfaktor/multi-worker:${{ github.sha }}
+
+      # - name: Wait for rollouts
+      #   run: |
+      #     kubectl rollout status deployment/client-deployment
+      #     kubectl rollout status deployment/server-deployment
+      #     kubectl rollout status deployment/worker-deployment
