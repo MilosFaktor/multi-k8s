@@ -39,23 +39,29 @@ jobs:
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # - name: Build test image
-      #   run: docker build -t milosfaktor/react-test -f ./client/Dockerfile.dev ./client
+      - name: Build test image
+        run: docker build -t milosfaktor/react-test -f ./client/Dockerfile.dev ./client
 
-      # - name: Run tests
-      #   run: docker run -e CI=true milosfaktor/react-test npm test
+      - name: Run tests
+        run: docker run -e CI=true milosfaktor/react-test npm test
+
+      - name: Build and Deploy images from script
+        run: ./deploy.sh
 
       # - name: Build production images
       #   run: |
-      #     docker build -t milosfaktor/multi-client:${{ github.sha }} ./client
-      #     docker build -t milosfaktor/multi-server:${{ github.sha }} ./server
-      #     docker build -t milosfaktor/multi-worker:${{ github.sha }} ./worker
+      #     docker build -t milosfaktor/multi-client:${{ github.sha }} -t milosfaktor/multi-client:latest ./client
+      #     docker build -t milosfaktor/maulti-server:${{ github.sha }} -t milosfaktor/multi-server:latest ./server
+      #     docker build -t milosfaktor/multi-worker:${{ github.sha }} -t milosfaktor/multi-worker:latest ./worker
 
       # - name: Push images
       #   run: |
       #     docker push milosfaktor/multi-client:${{ github.sha }}
-      #     docker push milosfaktor/multi-server:${{ github.sha }}
-      #     docker push milosfaktor/multi-worker:${{ github.sha }}
+      #       docker push milosfaktor/multi-client:latest
+      #       docker push milosfaktor/multi-server:${{ github.sha }}
+      #       docker push milosfaktor/multi-server:latest
+      #       docker push milosfaktor/multi-worker:${{ github.sha }}
+      #       docker push milosfaktor/multi-worker:latest
 
       # - name: Apply Kubernetes configs
       #   run: kubectl apply -f k8s
