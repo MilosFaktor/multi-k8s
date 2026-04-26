@@ -37,3 +37,33 @@ kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
 kubectl rollout restart deployment server-deployment
 kubectl rollout restart deployment worker-deployment
 kubectl rollout restart deployment postgres-deployment
+
+
+====== google cloud console shell ======
+0. set up gcloud
+gcloud config set project <project_ID>
+gcloud config set project k8s-project-494218
+
+gcloud config set compute/region europe-west10
+
+gcloud container clusters get-credentials <cluster_name>
+gcloud container clusters get-credentials multi-k8s
+
+
+1. create secret
+kubectl create secret generic pgpassword --from-literal PGPASSWORD=password123
+
+
+2. install helm and install ingress
+# https://helm.sh/docs/intro/install/
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4
+chmod 700 get_helm.sh
+./get_helm.sh
+
+# https://kubernetes.github.io/ingress-nginx/deploy/
+helm upgrade --install ingress-nginx ingress-nginx \
+  --repo https://kubernetes.github.io/ingress-nginx \
+  --namespace ingress-nginx --create-namespace
+
+
+
