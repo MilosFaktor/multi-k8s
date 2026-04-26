@@ -8,6 +8,13 @@ on:
             - "screenshots/**"
             - "commands.sh"
             - ".gitignore"
+    pull_request:
+        branches: [main]
+        paths-ignore:
+            - "**.md"
+            - "screenshots/**"
+            - "commands.sh"
+            - ".gitignore"
 
 
 jobs:
@@ -21,33 +28,61 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+      
+      # ---------- push only ----------
       - name: Authenticate to Google Cloud
+        if: github.event_name == 'push'
         uses: google-github-actions/auth@v3
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
+      # ---------- push only ----------
       - name: Set up gcloud
+        if: github.event_name == 'push'
         uses: google-github-actions/setup-gcloud@v2
 
+      # ---------- push only ----------  
       - name: Get GKE credentials
+        if: github.event_name == 'push'
         uses: google-github-actions/get-gke-credentials@v3
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_LOCATION }}
 
+      # ---------- push only ----------
       - name: Login to Docker Hub
+        if: github.event_name == 'push'
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build test image
-        run: docker build -t milosfaktor/react-test -f ./client/Dockerfile.dev ./client
+        run: |
+          docker buildx build \
+            --cache-from type=gha,scope=react-test \
+            --cache-to type=gha,mode=max,scope=react-test \
+            --load \
+            -t milosfaktor/react-test \
+            -f ./client/Dockerfile.dev \
+            ./client
 
       - name: Run tests
         run: docker run -e CI=true milosfaktor/react-test npm test
 
-      - name: Build and Deploy images from script
-        run: ./deploy.sh
+      # ---------- push only ----------
+      - name: Build images from script
+        if: github.event_name == 'push'
+        run: ./scripts/build.sh
 
+      # ---------- push only ----------
+      - name: Deploy images from script
+        if: github.event_name == 'push'
+        run: ./scripts/deploy.sh
+      
+
+      # ========= workflow without scripts and cache ===========
+      
       # - name: Build production images
       #   run: |
       #     docker build -t milosfaktor/multi-client:${{ github.sha }} -t milosfaktor/multi-client:latest ./client
