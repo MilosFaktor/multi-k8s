@@ -22,8 +22,8 @@ This project was initially based on a reference architecture, but I implemented 
 ### Pull Request Validation (Tests Only)
 <img src="screenshots/02-pr-tests.png" width="900">
 
-### Kubernetes Pods
-<img src="screenshots/03-k8s-pods.png" width="900">
+### Kubernetes Workloads, Networking & Secrets
+<img src="screenshots/03-k8s-overview.png" width="900">
 
 ### Deployment Rollout
 <img src="screenshots/04-rollout.png" width="900">
@@ -34,11 +34,9 @@ This project was initially based on a reference architecture, but I implemented 
 ### Docker Images (Versioned with SHA)
 <img src="screenshots/06-dockerhub-images.png" width="900">
 
-### Services & Ingress
-<img src="screenshots/07-services-ingress.png" width="900">
-
 ### System Architecture
-<img src="screenshots/08-architecture.png" width="900">
+<img src="screenshots/07-architecture.png" width="900">
+
 
 ## 🧠 System Architecture
 
