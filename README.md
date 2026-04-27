@@ -37,6 +37,7 @@ This project was initially based on a reference architecture, but I implemented 
 ### System Architecture
 <img src="screenshots/07-architecture.png" width="900">
 
+
 ## 🧠 System Architecture
 
 The application is built as a distributed system composed of multiple services:
