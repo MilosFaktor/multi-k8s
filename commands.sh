@@ -41,16 +41,20 @@ kubectl rollout restart deployment postgres-deployment
 
 ====== google cloud console shell ======
 0. set up gcloud
+#
 gcloud config set project <project_ID>
 gcloud config set project k8s-project-494218
 
+#
 gcloud config set compute/region europe-west10
 
+#
 gcloud container clusters get-credentials <cluster_name>
 gcloud container clusters get-credentials multi-k8s
 
 
 1. create secret
+#
 kubectl create secret generic pgpassword --from-literal PGPASSWORD=password123
 
 
